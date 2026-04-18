@@ -1,10 +1,9 @@
 """Tests for WaveGrid — uses synthetic numpy arrays instead of a real GRIB."""
 
-from datetime import UTC, datetime
+from datetime import datetime
 from unittest.mock import MagicMock
 
 import numpy as np
-import pytest
 
 from noaa_gfs_wave.models import WW3PointForecast
 from noaa_gfs_wave.wave_grid import WaveGrid
@@ -103,7 +102,10 @@ class TestWaveGridAt:
         # -35.2 -> 324.8
         point_pos = self.grid.at(lat=-9.0, lon=324.8)
         point_neg = self.grid.at(lat=-9.0, lon=-35.2)
-        assert point_pos.combined.significant_height_meters == point_neg.combined.significant_height_meters
+        assert (
+            point_pos.combined.significant_height_meters
+            == point_neg.combined.significant_height_meters
+        )
 
     def test_at_lon_360_handled(self):
         # lon=360 should map to lon=0 (modulo 360)
