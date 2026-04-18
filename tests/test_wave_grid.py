@@ -1,7 +1,7 @@
 """Tests for WaveGrid — uses synthetic numpy arrays instead of a real GRIB."""
 
 from datetime import UTC, datetime
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
@@ -50,6 +50,9 @@ def _make_dataset(lat_n: int = 49, lon_n: int = 61) -> MagicMock:
     ds.step = _da(np.timedelta64(3, "h"))
     ds.valid_time = _da(np.datetime64("2026-03-09T09:00:00"))
     ds.surface = _da(np.float32(0.0))
+
+    # isel() returns a point dataset; wire valid_time so _parse_valid_time works.
+    ds.isel.return_value.valid_time.values = np.datetime64("2026-03-09T09:00:00")
 
     return ds
 
@@ -116,10 +119,6 @@ class TestWaveGridAt:
         self.ds = _make_dataset()
         self.grid = WaveGrid(self.ds)
 
-    @pytest.fixture(autouse=True)
-    def patch_time(self, monkeypatch):
-        monkeypatch.setattr("noaa_gfs_wave.wave_grid.time_str_or_none", lambda *_: _VALID_TIME_STR)
-
     def test_at_returns_ww3_point_forecast(self):
         point = self.grid.at(lat=-9.0, lon=324.8)
         assert isinstance(point, WW3PointForecast)
@@ -173,32 +172,26 @@ class TestWaveGridContextManager:
 
 
 class TestWaveGridForecastDate:
-    def test_at_returns_forecast_date(self, monkeypatch):
-        monkeypatch.setattr("noaa_gfs_wave.wave_grid.time_str_or_none", lambda *_: _VALID_TIME_STR)
+    def test_at_returns_forecast_date(self):
         ds = _make_dataset()
         grid = WaveGrid(ds)
         point = grid.at(lat=-9.0, lon=324.8)
         assert isinstance(point.forecast_date, datetime)
 
     def test_malformed_valid_time_raises_grib_corrupt_error(self):
-        """Silent fallback to datetime.now() hides corrupt GRIB data."""
-        ds = _make_dataset()
-        grid = WaveGrid(ds)
-        with (
-            patch("noaa_gfs_wave.wave_grid.time_str_or_none", return_value="not-a-timestamp"),
-            pytest.raises(GribCorruptError, match="valid_time"),
-        ):
-            grid.at(lat=-9.0, lon=324.8)
+        """Unconvertible valid_time values must raise GribCorruptError."""
+        grid = WaveGrid(_make_dataset())
+        point_ds = MagicMock()
+        point_ds.valid_time.values = "not-a-timestamp"
+        with pytest.raises(GribCorruptError, match="valid_time"):
+            grid._parse_valid_time(point_ds)
 
     def test_missing_valid_time_raises_grib_corrupt_error(self):
         """A GRIB missing valid_time entirely is corrupt — not silently 'now'."""
-        ds = _make_dataset()
-        grid = WaveGrid(ds)
-        with (
-            patch("noaa_gfs_wave.wave_grid.time_str_or_none", return_value=None),
-            pytest.raises(GribCorruptError, match="valid_time"),
-        ):
-            grid.at(lat=-9.0, lon=324.8)
+        grid = WaveGrid(_make_dataset())
+        point_ds = MagicMock(spec=[])  # no attributes — simulates missing field
+        with pytest.raises(GribCorruptError, match="valid_time"):
+            grid._parse_valid_time(point_ds)
 
     def test_forecast_date_exact_value_from_nanosecond_epoch(self):
         """Nanosecond-epoch integers must not be coerced to year counts.

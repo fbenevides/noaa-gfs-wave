@@ -186,12 +186,9 @@ class WaveGrid:
         )
 
     def _parse_valid_time(self, point_ds: Any) -> datetime:
-        raw = time_str_or_none("valid_time", point_ds)
-        if raw is None:
-            raise GribCorruptError("could not parse valid_time from GRIB dataset")
         try:
-            ts = np.datetime64(raw)
-            return datetime.fromtimestamp(ts.astype("int64") / 1e9, tz=UTC)
+            raw = np.datetime64(point_ds.valid_time.values)
+            return raw.astype("datetime64[us]").astype("O").replace(tzinfo=UTC)
         except (TypeError, ValueError, AttributeError, OSError) as exc:
             raise GribCorruptError("could not parse valid_time from GRIB dataset") from exc
 
