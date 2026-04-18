@@ -73,6 +73,13 @@ class TestIntegrationFromLocal:
         point = grid.at(lat=LAT, lon=LON)
         assert isinstance(point.forecast_date, datetime)
 
+    def test_forecast_date_exact_utc_value(self, local_grib: NoaaGribFile):
+        # Fixture: reference_time 2026-03-09 06z + 3h = 2026-03-09 09:00:00 UTC
+        expected = datetime(2026, 3, 9, 9, 0, 0, tzinfo=UTC)
+        grid = local_grib.read()
+        point = grid.at(lat=LAT, lon=LON)
+        assert point.forecast_date == expected
+
     def test_context_manager_usage(self):
         grib = NoaaGribFile.from_local(FIXTURE_PATH)
         with grib.read() as grid:
