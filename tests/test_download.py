@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 from unittest.mock import patch
 
@@ -43,6 +42,7 @@ class TestDownloadTo:
     @responses_lib.activate
     def test_network_error_raises_grib_download_error(self, tmp_path: Path):
         import requests
+
         responses_lib.add(responses_lib.GET, TEST_URL, body=requests.ConnectionError("timeout"))
         with pytest.raises(GribDownloadError):
             download_to(TEST_URL, tmp_path / "out.grib2")
