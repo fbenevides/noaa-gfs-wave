@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from noaa_gfs_wave._dataset import partition, scalar, time_str_or_none
+from noaa_gfs_wave.exceptions import GribCorruptError
 from noaa_gfs_wave.models import (
     CombinedSea,
     DominantSystem,
@@ -184,13 +185,13 @@ class WaveGrid:
 
     def _parse_valid_time(self, point_ds: Any) -> datetime:
         raw = time_str_or_none("valid_time", point_ds)
-        if raw is not None:
-            try:
-                ts = np.datetime64(raw)
-                return datetime.fromtimestamp(ts.astype("int64") / 1e9, tz=UTC)
-            except Exception:
-                pass
-        return datetime.now(UTC)
+        if raw is None:
+            raise GribCorruptError("could not parse valid_time from GRIB dataset")
+        try:
+            ts = np.datetime64(raw)
+            return datetime.fromtimestamp(ts.astype("int64") / 1e9, tz=UTC)
+        except (TypeError, ValueError, AttributeError, OSError) as exc:
+            raise GribCorruptError("could not parse valid_time from GRIB dataset") from exc
 
     def _build_meta(self, point_ds: Any) -> WW3PointMeta:
         filename = None

@@ -1,7 +1,7 @@
 """Tests for WaveGrid — uses synthetic numpy arrays instead of a real GRIB."""
 
 from datetime import datetime
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
@@ -9,6 +9,8 @@ import pytest
 from noaa_gfs_wave.exceptions import GribCorruptError
 from noaa_gfs_wave.models import WW3PointForecast
 from noaa_gfs_wave.wave_grid import WaveGrid
+
+_VALID_TIME_STR = "2026-03-09T09:00:00"
 
 
 def _make_dataset(lat_n: int = 49, lon_n: int = 61) -> MagicMock:
@@ -114,6 +116,10 @@ class TestWaveGridAt:
         self.ds = _make_dataset()
         self.grid = WaveGrid(self.ds)
 
+    @pytest.fixture(autouse=True)
+    def patch_time(self, monkeypatch):
+        monkeypatch.setattr("noaa_gfs_wave.wave_grid.time_str_or_none", lambda *_: _VALID_TIME_STR)
+
     def test_at_returns_ww3_point_forecast(self):
         point = self.grid.at(lat=-9.0, lon=324.8)
         assert isinstance(point, WW3PointForecast)
@@ -167,7 +173,8 @@ class TestWaveGridContextManager:
 
 
 class TestWaveGridForecastDate:
-    def test_at_returns_forecast_date(self):
+    def test_at_returns_forecast_date(self, monkeypatch):
+        monkeypatch.setattr("noaa_gfs_wave.wave_grid.time_str_or_none", lambda *_: _VALID_TIME_STR)
         ds = _make_dataset()
         grid = WaveGrid(ds)
         point = grid.at(lat=-9.0, lon=324.8)
@@ -175,8 +182,6 @@ class TestWaveGridForecastDate:
 
     def test_malformed_valid_time_raises_grib_corrupt_error(self):
         """Silent fallback to datetime.now() hides corrupt GRIB data."""
-        from unittest.mock import patch
-
         ds = _make_dataset()
         grid = WaveGrid(ds)
         with (
@@ -187,8 +192,6 @@ class TestWaveGridForecastDate:
 
     def test_missing_valid_time_raises_grib_corrupt_error(self):
         """A GRIB missing valid_time entirely is corrupt — not silently 'now'."""
-        from unittest.mock import patch
-
         ds = _make_dataset()
         grid = WaveGrid(ds)
         with (
