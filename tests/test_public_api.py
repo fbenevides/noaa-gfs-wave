@@ -2,7 +2,6 @@
 
 import noaa_gfs_wave
 
-
 EXPECTED_PUBLIC_NAMES = {
     "NoaaGribFile",
     "WaveGrid",
@@ -57,8 +56,8 @@ class TestPublicApiSurface:
         import inspect
 
         import noaa_gfs_wave.grib_file as gf
-        import noaa_gfs_wave.wave_grid as wg
         import noaa_gfs_wave.models as m
+        import noaa_gfs_wave.wave_grid as wg
 
         for mod in (gf, wg, m):
             src = inspect.getsource(mod)
