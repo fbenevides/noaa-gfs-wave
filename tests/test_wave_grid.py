@@ -76,8 +76,26 @@ class TestWaveGridProperties:
     def test_swdir_shape_three_partitions(self):
         assert self.grid.swdir.shape == (3, 49, 61)
 
+    def test_mpww_is_ndarray(self):
+        assert isinstance(self.grid.mpww, np.ndarray)
+
+    def test_wvdir_is_ndarray(self):
+        assert isinstance(self.grid.wvdir, np.ndarray)
+
+    def test_wvdirww_is_ndarray(self):
+        assert isinstance(self.grid.wvdirww, np.ndarray)
+
     def test_ws_is_ndarray(self):
         assert isinstance(self.grid.ws, np.ndarray)
+
+    def test_wdir_is_ndarray(self):
+        assert isinstance(self.grid.wdir, np.ndarray)
+
+    def test_u_is_ndarray(self):
+        assert isinstance(self.grid.u, np.ndarray)
+
+    def test_v_is_ndarray(self):
+        assert isinstance(self.grid.v, np.ndarray)
 
     def test_latitudes_shape(self):
         assert self.grid.latitudes.shape == (49,)
