@@ -1,6 +1,6 @@
 """Tests for WaveGrid — uses synthetic numpy arrays instead of a real GRIB."""
 
-from datetime import datetime
+from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
 import numpy as np
@@ -199,3 +199,20 @@ class TestWaveGridForecastDate:
             pytest.raises(GribCorruptError, match="valid_time"),
         ):
             grid.at(lat=-9.0, lon=324.8)
+
+    def test_forecast_date_exact_value_from_nanosecond_epoch(self):
+        """Nanosecond-epoch integers must not be coerced to year counts.
+
+        np.datetime64("1773046800000000000") silently creates dtype[Y] — a year
+        count — yielding a 2-microsecond rounding error on the round-trip. The
+        fix must read the raw dataset value (int nanoseconds) and convert
+        directly without passing through the string helper.
+        """
+        # _make_dataset sets valid_time to np.datetime64("2026-03-09T09:00:00")
+        # whose .item() == 1773046800000000000 (nanosecond epoch int).
+        # The expected forecast_date is therefore exactly 2026-03-09 09:00:00 UTC.
+        expected = datetime(2026, 3, 9, 9, 0, 0, tzinfo=UTC)
+        ds = _make_dataset()
+        grid = WaveGrid(ds)
+        point = grid.at(lat=-9.0, lon=324.8)
+        assert point.forecast_date == expected
