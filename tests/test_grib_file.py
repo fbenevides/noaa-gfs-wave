@@ -112,17 +112,21 @@ class TestNoaaGribFileRead:
     def test_read_raises_corrupt_on_eof_error(self, tmp_path: Path):
         responses_lib.add(responses_lib.GET, EXPECTED_URL, body=b"BAD_DATA", status=200)
         grib = NoaaGribFile(REF_TIME, 6, 3, cache_dir=tmp_path)
-        with patch("noaa_gfs_wave.grib_file.open_dataset", side_effect=EOFError("corrupt")):
-            with pytest.raises(GribCorruptError):
-                grib.read()
+        with (
+            patch("noaa_gfs_wave.grib_file.open_dataset", side_effect=EOFError("corrupt")),
+            pytest.raises(GribCorruptError),
+        ):
+            grib.read()
 
     @responses_lib.activate
     def test_read_raises_corrupt_on_key_error(self, tmp_path: Path):
         responses_lib.add(responses_lib.GET, EXPECTED_URL, body=b"BAD_DATA", status=200)
         grib = NoaaGribFile(REF_TIME, 6, 3, cache_dir=tmp_path)
-        with patch("noaa_gfs_wave.grib_file.open_dataset", side_effect=KeyError("swh")):
-            with pytest.raises(GribCorruptError):
-                grib.read()
+        with (
+            patch("noaa_gfs_wave.grib_file.open_dataset", side_effect=KeyError("swh")),
+            pytest.raises(GribCorruptError),
+        ):
+            grib.read()
 
 
 class TestNoaaGribFileOpenDataset:
@@ -149,7 +153,9 @@ class TestNoaaGribFileLatest:
     def test_latest_accepts_now_override(self, tmp_path: Path):
         ref = datetime(2026, 3, 9, 0, 0, 0, tzinfo=UTC)
         now = datetime(2026, 3, 9, 12, 0, 0, tzinfo=UTC)
-        with patch("noaa_gfs_wave.grib_file.latest_available_cycle", return_value=(ref, 0)) as mock_cycle:
+        with patch(
+            "noaa_gfs_wave.grib_file.latest_available_cycle", return_value=(ref, 0)
+        ) as mock_cycle:
             NoaaGribFile.latest(forecast_hour=3, cache_dir=tmp_path, now=now)
         mock_cycle.assert_called_once_with(now)
 
