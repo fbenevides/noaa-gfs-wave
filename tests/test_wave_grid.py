@@ -4,7 +4,9 @@ from datetime import datetime
 from unittest.mock import MagicMock
 
 import numpy as np
+import pytest
 
+from noaa_gfs_wave.exceptions import GribCorruptError
 from noaa_gfs_wave.models import WW3PointForecast
 from noaa_gfs_wave.wave_grid import WaveGrid
 
@@ -170,3 +172,27 @@ class TestWaveGridForecastDate:
         grid = WaveGrid(ds)
         point = grid.at(lat=-9.0, lon=324.8)
         assert isinstance(point.forecast_date, datetime)
+
+    def test_malformed_valid_time_raises_grib_corrupt_error(self):
+        """Silent fallback to datetime.now() hides corrupt GRIB data."""
+        from unittest.mock import patch
+
+        ds = _make_dataset()
+        grid = WaveGrid(ds)
+        with (
+            patch("noaa_gfs_wave.wave_grid.time_str_or_none", return_value="not-a-timestamp"),
+            pytest.raises(GribCorruptError, match="valid_time"),
+        ):
+            grid.at(lat=-9.0, lon=324.8)
+
+    def test_missing_valid_time_raises_grib_corrupt_error(self):
+        """A GRIB missing valid_time entirely is corrupt — not silently 'now'."""
+        from unittest.mock import patch
+
+        ds = _make_dataset()
+        grid = WaveGrid(ds)
+        with (
+            patch("noaa_gfs_wave.wave_grid.time_str_or_none", return_value=None),
+            pytest.raises(GribCorruptError, match="valid_time"),
+        ):
+            grid.at(lat=-9.0, lon=324.8)
