@@ -24,7 +24,9 @@ from noaa_gfs_wave.models import (
 )
 
 if TYPE_CHECKING:
-    pass
+    import xarray
+
+    from noaa_gfs_wave.grib_file import NoaaGribFile
 
 
 class WaveGrid:
@@ -35,7 +37,7 @@ class WaveGrid:
     by passing a pre-loaded `xarray.Dataset` directly.
     """
 
-    def __init__(self, dataset: Any, source: Any = None) -> None:
+    def __init__(self, dataset: xarray.Dataset, source: NoaaGribFile | None = None) -> None:
         self._ds = dataset
         self._source = source
 

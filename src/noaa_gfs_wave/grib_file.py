@@ -7,7 +7,7 @@ A single NOAA GFS wave GRIB2 file. Constructed either explicitly or via
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -44,6 +44,7 @@ class NoaaGribFile:
         self._cache_dir = Path(cache_dir)
         self._request_timeout = request_timeout
         self._is_local_only = False
+        self._local_path_override: Path | None = None
 
     @classmethod
     def latest(
@@ -74,8 +75,6 @@ class NoaaGribFile:
         forecast_hour: int | None = None,
     ) -> NoaaGribFile:
         """Wrap an existing on-disk GRIB2 file — no network access."""
-        from datetime import UTC
-
         path = Path(path)
         instance = cls(
             reference_time or datetime(1970, 1, 1, tzinfo=UTC),
@@ -109,7 +108,7 @@ class NoaaGribFile:
 
     @property
     def local_path(self) -> Path:
-        if self._is_local_only and hasattr(self, "_local_path_override"):
+        if self._is_local_only and self._local_path_override is not None:
             return self._local_path_override
         return _local_path(
             self._cache_dir,
