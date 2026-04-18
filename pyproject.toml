@@ -1,0 +1,62 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "noaa-gfs-wave"
+version = "0.1.0"
+description = "Read NOAA GFS WaveWatch III forecast data from NOMADS."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Felipe Benevides", email = "felipe@apolloagriculture.com" }]
+requires-python = ">=3.11"
+keywords = ["noaa", "gfs", "ww3", "wavewatch", "surf", "forecast", "grib", "nomads"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Atmospheric Science",
+    "Typing :: Typed",
+]
+dependencies = [
+    "xarray>=2024.1,<2027",
+    "cfgrib>=0.9.14,<0.10",
+    "numpy>=1.26,<3",
+    "requests>=2.31,<3",
+    "pydantic>=2.5,<3",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8", "pytest-cov>=5", "responses>=0.25"]
+dev = ["ruff>=0.15", "build>=1.2", "twine>=5.0"]
+
+[project.urls]
+Repository = "https://github.com/fbenevides/noaa-gfs-wave"
+Changelog = "https://github.com/fbenevides/noaa-gfs-wave/blob/main/CHANGELOG.md"
+Issues = "https://github.com/fbenevides/noaa-gfs-wave/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/noaa_gfs_wave"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "C4", "SIM"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--cov=noaa_gfs_wave --cov-report=term-missing"
+
+[tool.coverage.run]
+source = ["src/noaa_gfs_wave"]
+
+[tool.coverage.report]
+fail_under = 90
