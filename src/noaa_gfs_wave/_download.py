@@ -43,6 +43,6 @@ def _write_atomic(content: bytes, dest: Path, partial: Path) -> None:
     try:
         partial.write_bytes(content)
         partial.replace(dest)
-    except Exception:
+    except OSError:
         partial.unlink(missing_ok=True)
         raise

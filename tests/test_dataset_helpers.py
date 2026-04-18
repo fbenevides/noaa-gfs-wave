@@ -1,6 +1,6 @@
 """Tests for _dataset.py helper functions — NaN and exception handling."""
 
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, PropertyMock
 
 import numpy as np
 import pytest
@@ -59,10 +59,11 @@ class TestScalar:
         result = scalar(ds, "swh")
         assert result is None
 
-    def test_handles_exception_in_values(self):
+    def test_handles_value_error_in_item(self):
         da = MagicMock()
-        # Make .values raise an exception when accessed
-        type(da).values = property(lambda self: (_ for _ in ()).throw(RuntimeError("broken")))
+        da.values = MagicMock()
+        da.values.shape = ()
+        da.values.item.side_effect = ValueError("broken")
         ds = {"swh": da}
         result = scalar(ds, "swh")
         assert result is None
@@ -93,9 +94,9 @@ class TestPartition:
         ds = self._build_ds("shts", [np.nan])
         assert partition(ds, "shts", 0) is None
 
-    def test_handles_exception_in_values(self):
+    def test_handles_type_error_on_values_access(self):
         da = MagicMock()
-        type(da).values = property(lambda self: (_ for _ in ()).throw(RuntimeError("broken")))
+        type(da).values = PropertyMock(side_effect=TypeError("broken"))
         result = partition({"shts": da}, "shts", 0)
         assert result is None
 
@@ -112,8 +113,8 @@ class TestTimeStrOrNone:
     def test_returns_none_for_missing_key(self):
         assert time_str_or_none("valid_time", {}) is None
 
-    def test_returns_none_on_exception(self):
+    def test_returns_none_on_value_error(self):
         da = MagicMock()
         da.values = MagicMock()
-        da.values.item.side_effect = RuntimeError("broken")
+        da.values.item.side_effect = ValueError("broken")
         assert time_str_or_none("valid_time", {"valid_time": da}) is None

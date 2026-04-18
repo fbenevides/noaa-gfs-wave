@@ -15,7 +15,7 @@ def to_float_or_none(x: Any) -> float | None:
     try:
         f = float(x)
         return None if math.isnan(f) else f
-    except Exception:
+    except (TypeError, ValueError):
         return None
 
 
@@ -28,7 +28,7 @@ def scalar(ds: Any, name: str) -> float | None:
         if getattr(val, "shape", None) == ():
             return to_float_or_none(val.item())
         return to_float_or_none(val)
-    except Exception:
+    except (KeyError, AttributeError, ValueError):
         return None
 
 
@@ -41,7 +41,7 @@ def partition(ds: Any, name: str, idx: int) -> float | None:
         if idx < arr.size:
             return to_float_or_none(arr[idx])
         return None
-    except Exception:
+    except (AttributeError, TypeError):
         return None
 
 
@@ -51,7 +51,7 @@ def time_str_or_none(da_name: str, ds: Any) -> str | None:
         return None
     try:
         return str(ds[da_name].values.item())
-    except Exception:
+    except (AttributeError, ValueError):
         return None
 
 
