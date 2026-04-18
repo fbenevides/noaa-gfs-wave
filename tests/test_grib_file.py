@@ -140,6 +140,16 @@ class TestNoaaGribFileOpenDataset:
             result = grib.open_dataset()
         assert result is mock_ds
 
+    @responses_lib.activate
+    def test_open_dataset_raises_corrupt_on_eof_error(self, tmp_path: Path):
+        responses_lib.add(responses_lib.GET, EXPECTED_URL, body=b"BAD_DATA", status=200)
+        grib = NoaaGribFile(REF_TIME, 6, 3, cache_dir=tmp_path)
+        with (
+            patch("noaa_gfs_wave.grib_file.open_dataset", side_effect=EOFError("truncated")),
+            pytest.raises(GribCorruptError),
+        ):
+            grib.open_dataset()
+
 
 class TestNoaaGribFileLatest:
     def test_latest_uses_latest_available_cycle(self, tmp_path: Path):
