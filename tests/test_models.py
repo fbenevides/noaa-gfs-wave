@@ -1,5 +1,3 @@
-import pytest
-
 from noaa_gfs_wave.models import (
     CombinedSea,
     DominantSystem,
@@ -107,7 +105,6 @@ class TestWW3PointForecast:
 
 class TestNoHarperImports:
     def test_models_module_has_no_harper_imports(self):
-        import importlib
         import inspect
 
         import noaa_gfs_wave.models as m
