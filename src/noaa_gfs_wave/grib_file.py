@@ -15,7 +15,7 @@ from noaa_gfs_wave._cycle import latest_available_cycle
 from noaa_gfs_wave._dataset import open_dataset
 from noaa_gfs_wave._download import download_to
 from noaa_gfs_wave.exceptions import GribCorruptError
-from noaa_gfs_wave.grib_address import GribAddress
+from noaa_gfs_wave.grib_address import NOAA_NOMADS_BASE_URL, GribAddress
 from noaa_gfs_wave.wave_grid import WaveGrid
 
 _GRIB_PARSE_ERRORS = (EOFError, KeyError, ValueError, OSError)
@@ -36,11 +36,13 @@ class NoaaGribFile:
         *,
         cache_dir: str | Path = "./noaa_cache",
         request_timeout: int = 30,
+        base_url: str = NOAA_NOMADS_BASE_URL,
     ) -> None:
         self._address = GribAddress(
             reference_time=reference_time,
             cycle=cycle,
             forecast_hour=forecast_hour,
+            base_url=base_url,
         )
         self._cache_dir = Path(cache_dir)
         self._request_timeout = request_timeout
@@ -55,6 +57,7 @@ class NoaaGribFile:
         cache_dir: str | Path = "./noaa_cache",
         now: datetime | None = None,
         request_timeout: int = 30,
+        base_url: str = NOAA_NOMADS_BASE_URL,
     ) -> NoaaGribFile:
         """Construct from the most recently published GFS wave cycle."""
         ref_time, cycle = latest_available_cycle(now)
@@ -64,6 +67,7 @@ class NoaaGribFile:
             forecast_hour,
             cache_dir=cache_dir,
             request_timeout=request_timeout,
+            base_url=base_url,
         )
 
     @classmethod
