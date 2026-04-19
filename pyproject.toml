@@ -24,11 +24,11 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
-    "xarray>=2024.1,<2027",
-    "cfgrib>=0.9.14,<0.10",
-    "numpy>=1.26,<3",
-    "requests>=2.31,<3",
-    "pydantic>=2.5,<3",
+    "xarray==2026.4.0",
+    "cfgrib==0.9.15.1",
+    "numpy==2.4.4",
+    "requests==2.33.1",
+    "pydantic==2.13.2",
 ]
 
 [project.optional-dependencies]
