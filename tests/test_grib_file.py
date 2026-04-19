@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 import responses as responses_lib
 
-from noaa_gfs_wave import NoaaGribFile
+from noaa_gfs_wave import NOAA_NOMADS_BASE_URL, NoaaGribFile
 from noaa_gfs_wave.exceptions import GribCorruptError, GribDownloadError, GribNotPublishedError
 from noaa_gfs_wave.wave_grid import WaveGrid
 
@@ -192,3 +192,15 @@ class TestNoaaGribFileFromLocal:
             result = grib.read()
         assert isinstance(result, WaveGrid)
         mock_open.assert_called_once_with(str(p))
+
+
+class TestNoaaGribFileBaseUrl:
+    def test_base_url_flows_to_remote_url(self, tmp_path: Path):
+        grib = NoaaGribFile(
+            REF_TIME, 6, 3, cache_dir=tmp_path, base_url="https://mirror.example/gfs"
+        )
+        assert grib.remote_url.startswith("https://mirror.example/gfs/")
+
+    def test_default_base_url_when_omitted(self, tmp_path: Path):
+        grib = NoaaGribFile(REF_TIME, 6, 3, cache_dir=tmp_path)
+        assert grib.remote_url.startswith(NOAA_NOMADS_BASE_URL)
