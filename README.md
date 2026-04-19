@@ -82,7 +82,13 @@ The NOAA WW3 grid uses longitudes in `0..360` (not `-180..180`). `WaveGrid.at()`
 
 ### NaN over land
 
-WW3 uses NaN to mark land grid points. `WaveGrid.at()` on a land point returns a `WW3PointForecast` where all numeric fields are `None`.
+WW3 uses NaN to mark land grid points. `WaveGrid.at()` on a land point returns a `WW3PointForecast` where all numeric fields are `None`. Use `is_land()` to check this without inspecting individual fields:
+
+```python
+point = grid.at(lat=-7.0, lon=-35.0)
+if point.is_land():
+    ...
+```
 
 ### Nearest-neighbor extraction
 
