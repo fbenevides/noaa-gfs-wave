@@ -12,6 +12,16 @@ TEST_URL = "https://nomads.ncep.noaa.gov/test/sample.grib2"
 VALID_GRIB_BODY = b"GRIB" + b"\x00" * 100 + b"7777"
 
 
+def _make_mock_response(body: bytes, *, content_length: str | None = None, status: int = 200):
+    from unittest.mock import MagicMock
+
+    mock = MagicMock()
+    mock.status_code = status
+    mock.content = body
+    mock.headers = {"Content-Length": content_length} if content_length is not None else {}
+    return mock
+
+
 class TestDownloadTo:
     @responses_lib.activate
     def test_happy_path_writes_file(self, tmp_path: Path):
@@ -78,18 +88,14 @@ class TestDownloadTo:
 
 
 class TestIntegrityChecks:
-    @responses_lib.activate
     def test_content_length_mismatch_raises_grib_corrupt_error(self, tmp_path: Path):
         short_body = b"GRIB" + b"\x00" * 100 + b"7777"  # 108 bytes, but we advertise 1000
-        responses_lib.add(
-            responses_lib.GET,
-            TEST_URL,
-            body=short_body,
-            status=200,
-            headers={"Content-Length": "1000"},
-        )
+        mock_response = _make_mock_response(short_body, content_length="1000")
         dest = tmp_path / "out.grib2"
-        with pytest.raises(GribCorruptError):
+        with (
+            patch("noaa_gfs_wave._download.requests.get", return_value=mock_response),
+            pytest.raises(GribCorruptError),
+        ):
             download_to(TEST_URL, dest)
         assert not Path(str(dest) + ".partial").exists()
 
