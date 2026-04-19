@@ -32,8 +32,8 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-test = ["pytest>=8", "pytest-cov>=5", "responses>=0.25"]
-dev = ["ruff>=0.15", "build>=1.2", "twine>=5.0"]
+test = ["pytest==9.0.3", "pytest-cov==7.1.0", "responses==0.26.0"]
+dev = ["ruff==0.15.11", "build==1.4.3", "twine==6.2.0"]
 
 [project.urls]
 Repository = "https://github.com/fbenevides/noaa-gfs-wave"
