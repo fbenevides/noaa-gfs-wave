@@ -36,3 +36,23 @@ jobs:
 
       - name: run-test
         run: uv run pytest --cov=noaa_gfs_wave --cov-fail-under=90
+
+  lint-pr-title:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            chore
+            test
+            refactor
+            docs
+          requireScope: false
+          subjectPattern: '^[a-z].*[^.]$'
+          subjectPatternError: |
+            PR title must start lowercase and not end in a period.
