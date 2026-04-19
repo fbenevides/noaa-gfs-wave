@@ -35,3 +35,6 @@ htmlcov/
 # OS
 .DS_Store
 Thumbs.db
+
+# Local-only files (CLAUDE.local.md, settings.local.json, .env.local, etc.)
+*.local.*
