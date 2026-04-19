@@ -103,6 +103,31 @@ class TestWW3PointForecast:
         assert forecast.forecast_date == datetime(2026, 3, 9, 9, 0, tzinfo=UTC)
 
 
+class TestWW3PointForecastIsLand:
+    def _make_forecast(self, combined_height: float | None):
+        from datetime import UTC, datetime
+
+        return WW3PointForecast(
+            forecast_date=datetime(2026, 3, 9, 9, 0, tzinfo=UTC),
+            meta=WW3PointMeta(),
+            wind10m=Wind10m(),
+            combined=CombinedSea(significant_height_meters=combined_height),
+            dominant=DominantSystem(),
+            wind_sea=WindSea(),
+            primary=SwellPartition(),
+            secondary=SwellPartition(),
+            tertiary=SwellPartition(),
+        )
+
+    def test_is_land_returns_true_when_combined_height_is_none(self):
+        forecast = self._make_forecast(combined_height=None)
+        assert forecast.is_land() is True
+
+    def test_is_land_returns_false_for_ocean_point(self):
+        forecast = self._make_forecast(combined_height=1.5)
+        assert forecast.is_land() is False
+
+
 class TestNoHarperImports:
     def test_models_module_has_no_harper_imports(self):
         import inspect
