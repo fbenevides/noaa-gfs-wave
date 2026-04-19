@@ -72,3 +72,6 @@ class WW3PointForecast(BaseModel):
     primary: SwellPartition
     secondary: SwellPartition
     tertiary: SwellPartition
+
+    def is_land(self) -> bool:
+        return self.combined.significant_height_meters is None
