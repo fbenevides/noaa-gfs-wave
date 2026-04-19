@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from noaa_gfs_wave.grib_address import GribAddress
+from noaa_gfs_wave.grib_address import NOAA_NOMADS_BASE_URL, GribAddress
 
 
 class TestGribAddress:
@@ -72,3 +72,37 @@ class TestGribAddress:
             forecast_hour=3,
         )
         assert self.address != other
+
+
+class TestGribAddressBaseUrl:
+    REF_TIME = datetime(2026, 3, 9, tzinfo=UTC)
+
+    def test_default_base_url_is_noaa_nomads(self):
+        address = GribAddress(reference_time=self.REF_TIME, cycle=12, forecast_hour=3)
+        assert address.base_url == NOAA_NOMADS_BASE_URL
+        assert address.remote_url().startswith(NOAA_NOMADS_BASE_URL)
+
+    def test_custom_base_url_overrides_default(self):
+        address = GribAddress(
+            reference_time=self.REF_TIME,
+            cycle=12,
+            forecast_hour=3,
+            base_url="https://mirror.example/gfs",
+        )
+        assert address.remote_url().startswith("https://mirror.example/gfs/")
+
+    def test_base_url_trailing_slash_stripped(self):
+        address = GribAddress(
+            reference_time=self.REF_TIME,
+            cycle=12,
+            forecast_hour=3,
+            base_url="https://mirror.example/gfs/",
+        )
+        url = address.remote_url()
+        assert "https://mirror.example/gfs//" not in url
+        assert url.startswith("https://mirror.example/gfs/")
+
+    def test_base_url_immutable_on_frozen_model(self):
+        address = GribAddress(reference_time=self.REF_TIME, cycle=12, forecast_hour=3)
+        with pytest.raises(ValidationError):
+            address.base_url = "https://other.example"
