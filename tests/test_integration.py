@@ -85,3 +85,14 @@ class TestIntegrationFromLocal:
         with grib.read() as grid:
             point = grid.at(lat=LAT, lon=LON)
         assert isinstance(point, WW3PointForecast)
+
+    def test_is_land_false_for_ocean_point(self, local_grib: NoaaGribFile):
+        grid = local_grib.read()
+        point = grid.at(lat=LAT, lon=LON)
+        assert point.is_land() is False
+
+    def test_is_land_true_for_land_point(self, local_grib: NoaaGribFile):
+        # lat=-7.0, lon=325.0 is over northeast Brazil (land) in this fixture
+        grid = local_grib.read()
+        point = grid.at(lat=-7.0, lon=325.0)
+        assert point.is_land() is True
