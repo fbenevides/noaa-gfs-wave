@@ -3,6 +3,7 @@
 import noaa_gfs_wave
 
 EXPECTED_PUBLIC_NAMES = {
+    "GribAddress",
     "NoaaGribFile",
     "WaveGrid",
     "WW3PointForecast",
@@ -14,6 +15,7 @@ EXPECTED_PUBLIC_NAMES = {
     "SwellPartition",
     "latest_available_cycle",
     "NOAA_CYCLES",
+    "NOAA_NOMADS_BASE_URL",
     "__version__",
 }
 

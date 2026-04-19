@@ -9,6 +9,7 @@ from noaa_gfs_wave.exceptions import (
     GribNotPublishedError,
     NoaaGfsWaveError,
 )
+from noaa_gfs_wave.grib_address import NOAA_NOMADS_BASE_URL, GribAddress
 from noaa_gfs_wave.grib_file import NoaaGribFile
 from noaa_gfs_wave.models import (
     CombinedSea,
@@ -25,6 +26,7 @@ __version__ = version("noaa-gfs-wave")
 
 __all__ = [
     # Core classes
+    "GribAddress",
     "NoaaGribFile",
     "WaveGrid",
     # Pydantic models
@@ -38,6 +40,8 @@ __all__ = [
     # Cycle utilities
     "latest_available_cycle",
     "NOAA_CYCLES",
+    # Constants
+    "NOAA_NOMADS_BASE_URL",
     # Exceptions
     "NoaaGfsWaveError",
     "GribDownloadError",

@@ -1,6 +1,6 @@
 """GRIB2 remote URL and local path builders.
 
-Frozen class — no I/O, no network. Separated for testability.
+Public class and constant — no I/O, no network. Separated for testability.
 """
 
 from datetime import datetime
@@ -8,7 +8,7 @@ from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict
 
-_NOAA_BASE_URL = "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod"
+NOAA_NOMADS_BASE_URL = "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod"
 
 
 class GribAddress(BaseModel):
@@ -31,7 +31,7 @@ class GribAddress(BaseModel):
 
     def remote_url(self) -> str:
         """Return the full NOMADS URL for a GFS wave GRIB2 file."""
-        return f"{_NOAA_BASE_URL}/{self.remote_relative_path()}"
+        return f"{NOAA_NOMADS_BASE_URL}/{self.remote_relative_path()}"
 
     def local_path(self, cache_dir: str | Path) -> Path:
         """Return the deterministic local cache path for a GFS wave GRIB2 file."""
