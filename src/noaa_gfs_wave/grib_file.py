@@ -91,8 +91,6 @@ class NoaaGribFile:
         instance._local_path_override = path
         return instance
 
-    # -- Properties -----------------------------------------------------------
-
     @property
     def reference_time(self) -> datetime:
         return self._address.reference_time
@@ -114,8 +112,6 @@ class NoaaGribFile:
         if self._is_local_only and self._local_path_override is not None:
             return self._local_path_override
         return self._address.local_path(self._cache_dir)
-
-    # -- I/O methods ----------------------------------------------------------
 
     def exists(self) -> bool:
         """Filesystem check only — no network."""
@@ -147,8 +143,6 @@ class NoaaGribFile:
         if not self._is_local_only:
             self.download()
         return self._open_raw()
-
-    # -- Private helpers ------------------------------------------------------
 
     def _load_wave_grid(self) -> WaveGrid:
         try:

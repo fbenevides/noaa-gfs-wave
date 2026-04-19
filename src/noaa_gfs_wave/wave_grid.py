@@ -41,8 +41,6 @@ class WaveGrid:
         self._ds = dataset
         self._source = source
 
-    # -- Grid arrays ----------------------------------------------------------
-
     @property
     def swh(self) -> np.ndarray:
         """Significant wave height (m), shape (lat, lon)."""
@@ -128,8 +126,6 @@ class WaveGrid:
         """The underlying xarray Dataset — escape hatch for advanced use."""
         return self._ds
 
-    # -- Point extraction -----------------------------------------------------
-
     def indices_at(self, lat: float, lon: float) -> tuple[int, int]:
         """Return (lat_idx, lon_idx) for the nearest grid point to (lat, lon).
 
@@ -151,8 +147,6 @@ class WaveGrid:
         point_ds = self._ds.isel(latitude=lat_idx, longitude=lon_idx)
         return self._build_forecast(point_ds)
 
-    # -- Lifecycle ------------------------------------------------------------
-
     def close(self) -> None:
         """Close the underlying xarray dataset."""
         self._ds.close()
@@ -162,8 +156,6 @@ class WaveGrid:
 
     def __exit__(self, *exc: Any) -> None:
         self.close()
-
-    # -- Private helpers ------------------------------------------------------
 
     def _build_forecast(self, point_ds: Any) -> WW3PointForecast:
         forecast_date = self._parse_valid_time(point_ds)
