@@ -21,8 +21,16 @@ import argparse
 import re
 import subprocess
 import sys
+from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
+
+
+@dataclass(frozen=True)
+class Commit:
+    sha: str
+    author: str
+    subject: str
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PYPROJECT = REPO_ROOT / "pyproject.toml"
