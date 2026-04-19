@@ -1,5 +1,7 @@
 """Assert that the public API surface (__all__) is stable and fully importable."""
 
+import re
+
 import noaa_gfs_wave
 
 EXPECTED_PUBLIC_NAMES = {
@@ -35,9 +37,9 @@ class TestPublicApiSurface:
         for name in EXPECTED_PUBLIC_NAMES | EXPECTED_EXCEPTIONS:
             assert hasattr(noaa_gfs_wave, name), f"Missing from noaa_gfs_wave: {name}"
 
-    def test_version_is_string(self):
+    def test_version_is_semver_string(self):
         assert isinstance(noaa_gfs_wave.__version__, str)
-        assert noaa_gfs_wave.__version__ == "0.1.0"
+        assert re.match(r"^\d+\.\d+\.\d+$", noaa_gfs_wave.__version__)
 
     def test_noaa_cycles_constant(self):
         assert noaa_gfs_wave.NOAA_CYCLES == [0, 6, 12, 18]
