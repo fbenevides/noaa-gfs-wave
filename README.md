@@ -149,6 +149,8 @@ cfgrib generates an index sidecar (`*.idx`) automatically. Include `*.idx` in cl
 | cfgrib can't parse the file | `GribCorruptError` |
 | `cache_dir` unwritable | `OSError` (unchanged) |
 
+Downloaded files are verified for completeness (`Content-Length` match) and GRIB2 framing (`GRIB` head, `7777` tail) before being committed to the cache. A mismatch raises `GribCorruptError` and the `.partial` file is discarded so the cache stays clean.
+
 ## Limitations
 
 - Wave model only (no GFS atmospheric, HRRR, NAM, RTOFS)
