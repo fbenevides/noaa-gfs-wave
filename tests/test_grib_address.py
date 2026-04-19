@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from noaa_gfs_wave._addressing import GribAddress
+from noaa_gfs_wave._grib_address import GribAddress
 
 
 class TestGribAddress:

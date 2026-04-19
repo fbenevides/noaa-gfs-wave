@@ -11,10 +11,10 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from noaa_gfs_wave._addressing import GribAddress
 from noaa_gfs_wave._cycle import latest_available_cycle
 from noaa_gfs_wave._dataset import open_dataset
 from noaa_gfs_wave._download import download_to
+from noaa_gfs_wave._grib_address import GribAddress
 from noaa_gfs_wave.exceptions import GribCorruptError
 from noaa_gfs_wave.wave_grid import WaveGrid
 
