@@ -50,6 +50,42 @@ print(ds.swh)
 ds.close()
 ```
 
+## Custom base URL (mirrors, testing)
+
+By default, all downloads hit NOAA NOMADS. To point at an internal mirror or
+a test server (useful when NOMADS is rate-limiting or unavailable), pass
+`base_url` to either `GribAddress` or `NoaaGribFile`.
+
+```python
+from noaa_gfs_wave import GribAddress, NoaaGribFile, NOAA_NOMADS_BASE_URL
+from datetime import datetime, UTC
+
+ref_time = datetime(2026, 3, 9, 0, 0, 0, tzinfo=UTC)
+
+# Default — hits NOAA NOMADS
+address = GribAddress(reference_time=ref_time, cycle=12, forecast_hour=3)
+url = address.remote_url()  # https://nomads.ncep.noaa.gov/...
+
+# Custom mirror via GribAddress
+address = GribAddress(
+    reference_time=ref_time,
+    cycle=12,
+    forecast_hour=3,
+    base_url="https://my-mirror.example/gfs",
+)
+
+# Same knob on NoaaGribFile
+grib = NoaaGribFile(
+    reference_time=ref_time,
+    cycle=12,
+    forecast_hour=3,
+    base_url="https://my-mirror.example/gfs",
+)
+```
+
+`NOAA_NOMADS_BASE_URL` is the canonical base URL string and can be imported
+directly if you need to construct URLs manually.
+
 ## API Reference
 
 | Name | Type | Description |
