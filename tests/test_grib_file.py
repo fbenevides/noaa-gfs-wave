@@ -16,6 +16,7 @@ EXPECTED_URL = (
     "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/"
     "gfs.20260309/06/wave/gridded/gfswave.t06z.global.0p25.f003.grib2"
 )
+_VALID_GRIB_BODY = b"GRIB" + b"\x00" * 100 + b"7777"
 
 
 class TestNoaaGribFileConstruction:
@@ -58,11 +59,11 @@ class TestNoaaGribFileExists:
 class TestNoaaGribFileDownload:
     @responses_lib.activate
     def test_download_writes_file(self, tmp_path: Path):
-        responses_lib.add(responses_lib.GET, EXPECTED_URL, body=b"GRIB_DATA", status=200)
+        responses_lib.add(responses_lib.GET, EXPECTED_URL, body=_VALID_GRIB_BODY, status=200)
         grib = NoaaGribFile(REF_TIME, 6, 3, cache_dir=tmp_path)
         path = grib.download()
         assert path == grib.local_path
-        assert path.read_bytes() == b"GRIB_DATA"
+        assert path.read_bytes() == _VALID_GRIB_BODY
 
     @responses_lib.activate
     def test_download_skips_if_cached(self, tmp_path: Path):
@@ -75,12 +76,12 @@ class TestNoaaGribFileDownload:
 
     @responses_lib.activate
     def test_download_force_redownloads(self, tmp_path: Path):
-        responses_lib.add(responses_lib.GET, EXPECTED_URL, body=b"NEW_DATA", status=200)
+        responses_lib.add(responses_lib.GET, EXPECTED_URL, body=_VALID_GRIB_BODY, status=200)
         grib = NoaaGribFile(REF_TIME, 6, 3, cache_dir=tmp_path)
         grib.local_path.parent.mkdir(parents=True, exist_ok=True)
         grib.local_path.write_bytes(b"OLD_DATA")
         grib.download(force=True)
-        assert grib.local_path.read_bytes() == b"NEW_DATA"
+        assert grib.local_path.read_bytes() == _VALID_GRIB_BODY
 
     @responses_lib.activate
     def test_download_raises_not_published_on_404(self, tmp_path: Path):
@@ -100,7 +101,7 @@ class TestNoaaGribFileDownload:
 class TestNoaaGribFileRead:
     @responses_lib.activate
     def test_read_returns_wave_grid(self, tmp_path: Path):
-        responses_lib.add(responses_lib.GET, EXPECTED_URL, body=b"GRIB_DATA", status=200)
+        responses_lib.add(responses_lib.GET, EXPECTED_URL, body=_VALID_GRIB_BODY, status=200)
         grib = NoaaGribFile(REF_TIME, 6, 3, cache_dir=tmp_path)
         with patch("noaa_gfs_wave.grib_file.open_dataset") as mock_open:
             mock_ds = MagicMock()
@@ -110,7 +111,7 @@ class TestNoaaGribFileRead:
 
     @responses_lib.activate
     def test_read_raises_corrupt_on_eof_error(self, tmp_path: Path):
-        responses_lib.add(responses_lib.GET, EXPECTED_URL, body=b"BAD_DATA", status=200)
+        responses_lib.add(responses_lib.GET, EXPECTED_URL, body=_VALID_GRIB_BODY, status=200)
         grib = NoaaGribFile(REF_TIME, 6, 3, cache_dir=tmp_path)
         with (
             patch("noaa_gfs_wave.grib_file.open_dataset", side_effect=EOFError("corrupt")),
@@ -120,7 +121,7 @@ class TestNoaaGribFileRead:
 
     @responses_lib.activate
     def test_read_raises_corrupt_on_key_error(self, tmp_path: Path):
-        responses_lib.add(responses_lib.GET, EXPECTED_URL, body=b"BAD_DATA", status=200)
+        responses_lib.add(responses_lib.GET, EXPECTED_URL, body=_VALID_GRIB_BODY, status=200)
         grib = NoaaGribFile(REF_TIME, 6, 3, cache_dir=tmp_path)
         with (
             patch("noaa_gfs_wave.grib_file.open_dataset", side_effect=KeyError("swh")),
@@ -132,7 +133,7 @@ class TestNoaaGribFileRead:
 class TestNoaaGribFileOpenDataset:
     @responses_lib.activate
     def test_open_dataset_returns_dataset(self, tmp_path: Path):
-        responses_lib.add(responses_lib.GET, EXPECTED_URL, body=b"GRIB_DATA", status=200)
+        responses_lib.add(responses_lib.GET, EXPECTED_URL, body=_VALID_GRIB_BODY, status=200)
         grib = NoaaGribFile(REF_TIME, 6, 3, cache_dir=tmp_path)
         with patch("noaa_gfs_wave.grib_file.open_dataset") as mock_open:
             mock_ds = MagicMock()
@@ -142,7 +143,7 @@ class TestNoaaGribFileOpenDataset:
 
     @responses_lib.activate
     def test_open_dataset_raises_corrupt_on_eof_error(self, tmp_path: Path):
-        responses_lib.add(responses_lib.GET, EXPECTED_URL, body=b"BAD_DATA", status=200)
+        responses_lib.add(responses_lib.GET, EXPECTED_URL, body=_VALID_GRIB_BODY, status=200)
         grib = NoaaGribFile(REF_TIME, 6, 3, cache_dir=tmp_path)
         with (
             patch("noaa_gfs_wave.grib_file.open_dataset", side_effect=EOFError("truncated")),
