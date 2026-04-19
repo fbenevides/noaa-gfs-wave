@@ -105,9 +105,7 @@ class TestFormatChangelogSection:
         assert "add tests" not in output
 
     def test_empty_types_are_omitted(self):
-        commits = self._commits(
-            "feat", Commit(sha="abc1234", author="fbenevides", subject="x")
-        )
+        commits = self._commits("feat", Commit(sha="abc1234", author="fbenevides", subject="x"))
         output = format_changelog_section("0.1.1", self.ON, commits, repo_url=REPO_URL)
         assert "### Fixed" not in output
         assert "### Changed" not in output
@@ -127,8 +125,6 @@ class TestFormatChangelogSection:
         commits = self._commits(
             "feat", Commit(sha="abc1234", author="fbenevides", subject="add foo")
         )
-        output = format_changelog_section(
-            "0.1.1", self.ON, commits, repo_url=REPO_URL + "/"
-        )
+        output = format_changelog_section("0.1.1", self.ON, commits, repo_url=REPO_URL + "/")
         assert "commit//abc1234" not in output
         assert "/commit/abc1234" in output
