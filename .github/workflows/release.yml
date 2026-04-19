@@ -16,27 +16,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install system dependencies
+      - name: install-system-dependencies
         run: sudo apt-get install -y libeccodes-dev
 
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v5
+      - name: setup-uv
+        uses: astral-sh/setup-uv@v5
         with:
           python-version: "3.12"
 
-      - name: Install build tools
-        run: pip install build twine
+      - name: build-distribution
+        run: uv build
 
-      - name: Build distribution
-        run: python -m build
+      - name: verify-distribution
+        run: uv run --with twine twine check dist/*
 
-      - name: Verify distribution
-        run: twine check dist/*
-
-      - name: Publish to PyPI
+      - name: publish-to-pypi
         uses: pypa/gh-action-pypi-publish@release/v1
 
-      - name: Create GitHub Release
+      - name: create-github-release
         uses: softprops/action-gh-release@v2
         with:
           files: dist/*
