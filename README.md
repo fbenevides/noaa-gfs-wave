@@ -123,13 +123,20 @@ cfgrib generates an index sidecar (`*.idx`) automatically. Include `*.idx` in cl
 
 ## Development
 
+The library is built with hatchling; dev and CI use uv for fast, reproducible installs.
+
 ```bash
 git clone https://github.com/fbenevides/noaa-gfs-wave
 cd noaa-gfs-wave
-python -m venv .venv && source .venv/bin/activate
-pip install -e ".[test,dev]"
-pytest
-ruff check .
+uv sync --all-extras
+uv run pytest
+uv run ruff check .
+```
+
+End-users who aren't on uv can still install with pip:
+
+```bash
+pip install noaa-gfs-wave
 ```
 
 ## License
