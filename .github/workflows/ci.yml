@@ -16,22 +16,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install system dependencies
+      - name: install-system-dependencies
         run: sudo apt-get install -y libeccodes-dev
 
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: setup-python-${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install dependencies
+      - name: install-dependencies
         run: pip install -e ".[test,dev]"
 
-      - name: Lint with ruff
+      - name: lint-ruff
         run: ruff check .
 
-      - name: Check formatting with ruff
+      - name: check-format
         run: ruff format --check .
 
-      - name: Run tests
+      - name: run-test
         run: pytest --cov=noaa_gfs_wave --cov-fail-under=90
