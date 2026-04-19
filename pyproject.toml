@@ -9,7 +9,7 @@ description = "Read NOAA GFS WaveWatch III forecast data from NOMADS."
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
-authors = [{ name = "Felipe Benevides", email = "felipe@apolloagriculture.com" }]
+authors = [{ name = "Felipe Benevides", email = "me@benevides.pro" }]
 requires-python = ">=3.11"
 keywords = ["noaa", "gfs", "ww3", "wavewatch", "surf", "forecast", "grib", "nomads"]
 classifiers = [
