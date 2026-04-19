@@ -632,17 +632,17 @@ test = [
 
 [package.metadata]
 requires-dist = [
-    { name = "build", marker = "extra == 'dev'", specifier = ">=1.2" },
-    { name = "cfgrib", specifier = ">=0.9.14,<0.10" },
-    { name = "numpy", specifier = ">=1.26,<3" },
-    { name = "pydantic", specifier = ">=2.5,<3" },
-    { name = "pytest", marker = "extra == 'test'", specifier = ">=8" },
-    { name = "pytest-cov", marker = "extra == 'test'", specifier = ">=5" },
-    { name = "requests", specifier = ">=2.31,<3" },
-    { name = "responses", marker = "extra == 'test'", specifier = ">=0.25" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.15" },
-    { name = "twine", marker = "extra == 'dev'", specifier = ">=5.0" },
-    { name = "xarray", specifier = ">=2024.1,<2027" },
+    { name = "build", marker = "extra == 'dev'", specifier = "==1.4.3" },
+    { name = "cfgrib", specifier = "==0.9.15.1" },
+    { name = "numpy", specifier = "==2.4.4" },
+    { name = "pydantic", specifier = "==2.13.2" },
+    { name = "pytest", marker = "extra == 'test'", specifier = "==9.0.3" },
+    { name = "pytest-cov", marker = "extra == 'test'", specifier = "==7.1.0" },
+    { name = "requests", specifier = "==2.33.1" },
+    { name = "responses", marker = "extra == 'test'", specifier = "==0.26.0" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = "==0.15.11" },
+    { name = "twine", marker = "extra == 'dev'", specifier = "==6.2.0" },
+    { name = "xarray", specifier = "==2026.4.0" },
 ]
 provides-extras = ["test", "dev"]
 
