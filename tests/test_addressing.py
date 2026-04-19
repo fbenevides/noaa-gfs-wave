@@ -36,7 +36,9 @@ class TestGribAddress:
         assert p == Path("/tmp/cache/20260309_12_003.grib2")
 
     def test_cycle_two_digit_padding(self):
-        addr = GribAddress(reference_time=datetime(2026, 3, 9, tzinfo=UTC), cycle=0, forecast_hour=0)
+        addr = GribAddress(
+            reference_time=datetime(2026, 3, 9, tzinfo=UTC), cycle=0, forecast_hour=0
+        )
         assert "/gfs.20260309/00/wave" in addr.remote_url()
 
     def test_forecast_hour_three_digit_padding(self):
@@ -46,7 +48,9 @@ class TestGribAddress:
         assert "f120.grib2" in addr.remote_url()
 
     def test_local_path_zero_padded(self):
-        addr = GribAddress(reference_time=datetime(2026, 3, 9, tzinfo=UTC), cycle=0, forecast_hour=0)
+        addr = GribAddress(
+            reference_time=datetime(2026, 3, 9, tzinfo=UTC), cycle=0, forecast_hour=0
+        )
         assert addr.local_path("./cache").name == "20260309_00_000.grib2"
 
     def test_frozen_raises_on_assignment(self):

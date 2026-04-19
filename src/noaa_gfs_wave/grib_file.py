@@ -11,8 +11,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from noaa_gfs_wave._addressing import local_path as _local_path
-from noaa_gfs_wave._addressing import remote_url as _remote_url
+from noaa_gfs_wave._addressing import GribAddress
 from noaa_gfs_wave._cycle import latest_available_cycle
 from noaa_gfs_wave._dataset import open_dataset
 from noaa_gfs_wave._download import download_to
@@ -38,9 +37,11 @@ class NoaaGribFile:
         cache_dir: str | Path = "./noaa_cache",
         request_timeout: int = 30,
     ) -> None:
-        self._reference_time = reference_time
-        self._cycle = cycle
-        self._forecast_hour = forecast_hour
+        self._address = GribAddress(
+            reference_time=reference_time,
+            cycle=cycle,
+            forecast_hour=forecast_hour,
+        )
         self._cache_dir = Path(cache_dir)
         self._request_timeout = request_timeout
         self._is_local_only = False
@@ -90,32 +91,25 @@ class NoaaGribFile:
 
     @property
     def reference_time(self) -> datetime:
-        return self._reference_time
+        return self._address.reference_time
 
     @property
     def cycle(self) -> int:
-        return self._cycle
+        return self._address.cycle
 
     @property
     def forecast_hour(self) -> int:
-        return self._forecast_hour
+        return self._address.forecast_hour
 
     @property
     def remote_url(self) -> str:
-        return _remote_url(
-            self._reference_time, cycle=self._cycle, forecast_hour=self._forecast_hour
-        )
+        return self._address.remote_url()
 
     @property
     def local_path(self) -> Path:
         if self._is_local_only and self._local_path_override is not None:
             return self._local_path_override
-        return _local_path(
-            self._cache_dir,
-            self._reference_time,
-            cycle=self._cycle,
-            forecast_hour=self._forecast_hour,
-        )
+        return self._address.local_path(self._cache_dir)
 
     # -- I/O methods ----------------------------------------------------------
 

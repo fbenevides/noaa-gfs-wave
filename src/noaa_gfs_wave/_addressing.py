@@ -1,37 +1,40 @@
 """GRIB2 remote URL and local path builders.
 
-Pure functions — no I/O, no network. Separated for testability.
+Frozen class — no I/O, no network. Separated for testability.
 """
 
 from datetime import datetime
 from pathlib import Path
 
+from pydantic import BaseModel, ConfigDict
+
 _NOAA_BASE_URL = "https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod"
 
 
-def remote_relative_path(reference_time: datetime, *, cycle: int, forecast_hour: int) -> str:
-    """Return the NOMADS-relative path for a GFS wave GRIB2 file."""
-    date_str = reference_time.strftime("%Y%m%d")
-    return (
-        f"gfs.{date_str}/{cycle:02d}/wave/gridded/"
-        f"gfswave.t{cycle:02d}z.global.0p25.f{forecast_hour:03d}.grib2"
-    )
+class GribAddress(BaseModel):
+    """NOMADS address for a single GFS wave GRIB2 file — the
+    (reference_time, cycle, forecast_hour) triple with derivation methods."""
 
+    model_config = ConfigDict(frozen=True)
 
-def remote_url(reference_time: datetime, *, cycle: int, forecast_hour: int) -> str:
-    """Return the full NOMADS URL for a GFS wave GRIB2 file."""
-    rel = remote_relative_path(reference_time, cycle=cycle, forecast_hour=forecast_hour)
-    return f"{_NOAA_BASE_URL}/{rel}"
+    reference_time: datetime
+    cycle: int
+    forecast_hour: int
 
+    def remote_relative_path(self) -> str:
+        """Return the NOMADS-relative path for a GFS wave GRIB2 file."""
+        date_str = self.reference_time.strftime("%Y%m%d")
+        return (
+            f"gfs.{date_str}/{self.cycle:02d}/wave/gridded/"
+            f"gfswave.t{self.cycle:02d}z.global.0p25.f{self.forecast_hour:03d}.grib2"
+        )
 
-def local_path(
-    cache_dir: str | Path,
-    reference_time: datetime,
-    *,
-    cycle: int,
-    forecast_hour: int,
-) -> Path:
-    """Return the deterministic local cache path for a GFS wave GRIB2 file."""
-    date_str = reference_time.strftime("%Y%m%d")
-    filename = f"{date_str}_{cycle:02d}_{forecast_hour:03d}.grib2"
-    return Path(cache_dir) / filename
+    def remote_url(self) -> str:
+        """Return the full NOMADS URL for a GFS wave GRIB2 file."""
+        return f"{_NOAA_BASE_URL}/{self.remote_relative_path()}"
+
+    def local_path(self, cache_dir: str | Path) -> Path:
+        """Return the deterministic local cache path for a GFS wave GRIB2 file."""
+        date_str = self.reference_time.strftime("%Y%m%d")
+        filename = f"{date_str}_{self.cycle:02d}_{self.forecast_hour:03d}.grib2"
+        return Path(cache_dir) / filename
