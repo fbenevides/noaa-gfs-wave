@@ -57,6 +57,21 @@ class TestWindSea:
         assert ws.mean_period_seconds is None
         assert ws.direction_degrees_from is None
 
+    def test_power_is_none_when_height_missing(self):
+        assert WindSea(mean_period_seconds=10.0).power_kilowatts_per_meter is None
+
+    def test_power_is_none_when_period_missing(self):
+        assert WindSea(significant_height_meters=2.0).power_kilowatts_per_meter is None
+
+    def test_power_matches_physics_formula(self):
+        import math
+
+        import pytest
+
+        coeff = 1025 * 9.81**2 / (64 * math.pi * 1000)
+        ws = WindSea(significant_height_meters=2.0, mean_period_seconds=10.0)
+        assert ws.power_kilowatts_per_meter == pytest.approx(coeff * 4.0 * 10.0)
+
 
 class TestSwellPartition:
     def test_all_fields_optional(self):
@@ -64,6 +79,21 @@ class TestSwellPartition:
         assert sp.significant_height_meters is None
         assert sp.mean_period_seconds is None
         assert sp.direction_degrees_from is None
+
+    def test_power_is_none_when_height_missing(self):
+        assert SwellPartition(mean_period_seconds=10.0).power_kilowatts_per_meter is None
+
+    def test_power_is_none_when_period_missing(self):
+        assert SwellPartition(significant_height_meters=2.0).power_kilowatts_per_meter is None
+
+    def test_power_matches_physics_formula(self):
+        import math
+
+        import pytest
+
+        coeff = 1025 * 9.81**2 / (64 * math.pi * 1000)
+        sp = SwellPartition(significant_height_meters=1.5, mean_period_seconds=12.0)
+        assert sp.power_kilowatts_per_meter == pytest.approx(coeff * 2.25 * 12.0)
 
 
 class TestWW3PointMeta:
