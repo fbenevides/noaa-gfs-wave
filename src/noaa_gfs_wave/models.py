@@ -4,11 +4,19 @@ All models are portable — zero Harper or external service imports.
 Dependencies: stdlib (datetime) + pydantic only.
 """
 
+import math
 from datetime import datetime
 
 from pydantic import BaseModel, computed_field
 
 _MPS_TO_KNOTS = 3600 / 1852
+_WAVE_POWER_COEFF_KW_PER_M = 1025 * 9.81**2 / (64 * math.pi * 1000)
+
+
+def _partition_power_kw_per_m(height_m: float | None, period_s: float | None) -> float | None:
+    if height_m is None or period_s is None:
+        return None
+    return _WAVE_POWER_COEFF_KW_PER_M * height_m * height_m * period_s
 
 
 class Wind10m(BaseModel):
@@ -48,6 +56,11 @@ class WindSea(BaseModel):
     mean_period_seconds: float | None = None
     direction_degrees_from: float | None = None
 
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def power_kilowatts_per_meter(self) -> float | None:
+        return _partition_power_kw_per_m(self.significant_height_meters, self.mean_period_seconds)
+
 
 class SwellPartition(BaseModel):
     """One partitioned swell system (primary, secondary, or tertiary)."""
@@ -55,6 +68,11 @@ class SwellPartition(BaseModel):
     significant_height_meters: float | None = None
     mean_period_seconds: float | None = None
     direction_degrees_from: float | None = None
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def power_kilowatts_per_meter(self) -> float | None:
+        return _partition_power_kw_per_m(self.significant_height_meters, self.mean_period_seconds)
 
 
 class WW3PointMeta(BaseModel):
@@ -84,3 +102,14 @@ class WW3PointForecast(BaseModel):
 
     def is_land(self) -> bool:
         return self.combined.significant_height_meters is None
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def power_kilowatts_per_meter(self) -> float | None:
+        if self.is_land():
+            return None
+        parts = (self.wind_sea, self.primary, self.secondary, self.tertiary)
+        contribs = [
+            p.power_kilowatts_per_meter for p in parts if p.power_kilowatts_per_meter is not None
+        ]
+        return sum(contribs) if contribs else None

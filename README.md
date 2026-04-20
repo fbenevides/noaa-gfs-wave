@@ -33,6 +33,7 @@ grid = grib.read()
 point = grid.at(lat=-9.1, lon=-35.2)
 print(point.combined.significant_height_meters)
 print(point.wind10m.speed_meters_per_second, point.wind10m.speed_knots)
+print(point.power_kilowatts_per_meter)  # kW per meter of wave crest
 
 # Explicit cycle
 from datetime import datetime, UTC

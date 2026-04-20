@@ -29,6 +29,8 @@ def print_point(point: WW3PointForecast, lat: float, lon: float) -> None:
     print(
         f"  wind  : {point.wind10m.speed_meters_per_second:.1f} m/s ({point.wind10m.speed_knots:.1f} kn)"
     )
+    if point.power_kilowatts_per_meter is not None:
+        print(f"  power : {point.power_kilowatts_per_meter:.1f} kW/m")
 
 
 if __name__ == "__main__":

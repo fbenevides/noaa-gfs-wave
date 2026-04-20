@@ -32,6 +32,9 @@ htmlcov/
 # cfgrib index files (auto-generated, not committed)
 *.idx
 
+# Local GRIB cache from example scripts
+noaa_cache/
+
 # OS
 .DS_Store
 Thumbs.db

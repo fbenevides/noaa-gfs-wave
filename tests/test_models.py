@@ -57,6 +57,21 @@ class TestWindSea:
         assert ws.mean_period_seconds is None
         assert ws.direction_degrees_from is None
 
+    def test_power_is_none_when_height_missing(self):
+        assert WindSea(mean_period_seconds=10.0).power_kilowatts_per_meter is None
+
+    def test_power_is_none_when_period_missing(self):
+        assert WindSea(significant_height_meters=2.0).power_kilowatts_per_meter is None
+
+    def test_power_matches_physics_formula(self):
+        import math
+
+        import pytest
+
+        coeff = 1025 * 9.81**2 / (64 * math.pi * 1000)
+        ws = WindSea(significant_height_meters=2.0, mean_period_seconds=10.0)
+        assert ws.power_kilowatts_per_meter == pytest.approx(coeff * 4.0 * 10.0)
+
 
 class TestSwellPartition:
     def test_all_fields_optional(self):
@@ -64,6 +79,21 @@ class TestSwellPartition:
         assert sp.significant_height_meters is None
         assert sp.mean_period_seconds is None
         assert sp.direction_degrees_from is None
+
+    def test_power_is_none_when_height_missing(self):
+        assert SwellPartition(mean_period_seconds=10.0).power_kilowatts_per_meter is None
+
+    def test_power_is_none_when_period_missing(self):
+        assert SwellPartition(significant_height_meters=2.0).power_kilowatts_per_meter is None
+
+    def test_power_matches_physics_formula(self):
+        import math
+
+        import pytest
+
+        coeff = 1025 * 9.81**2 / (64 * math.pi * 1000)
+        sp = SwellPartition(significant_height_meters=1.5, mean_period_seconds=12.0)
+        assert sp.power_kilowatts_per_meter == pytest.approx(coeff * 2.25 * 12.0)
 
 
 class TestWW3PointMeta:
@@ -136,6 +166,73 @@ class TestWW3PointForecastIsLand:
     def test_is_land_returns_false_for_ocean_point(self):
         forecast = self._make_forecast(combined_height=1.5)
         assert forecast.is_land() is False
+
+
+class TestWW3PointForecastPower:
+    def _make(self, **overrides):
+        from datetime import UTC, datetime
+
+        defaults = {
+            "forecast_date": datetime(2026, 3, 9, 9, 0, tzinfo=UTC),
+            "meta": WW3PointMeta(),
+            "wind10m": Wind10m(),
+            "combined": CombinedSea(),
+            "dominant": DominantSystem(),
+            "wind_sea": WindSea(),
+            "primary": SwellPartition(),
+            "secondary": SwellPartition(),
+            "tertiary": SwellPartition(),
+        }
+        return WW3PointForecast(**(defaults | overrides))
+
+    def test_returns_none_for_land_point(self):
+        forecast = self._make()
+        assert forecast.power_kilowatts_per_meter is None
+
+    def test_returns_none_when_ocean_but_all_partitions_missing_data(self):
+        forecast = self._make(combined=CombinedSea(significant_height_meters=2.0))
+        assert forecast.power_kilowatts_per_meter is None
+
+    def test_single_partition_matches_physics_formula(self):
+        import math
+
+        import pytest
+
+        coeff = 1025 * 9.81**2 / (64 * math.pi * 1000)
+        expected = coeff * (2.0**2) * 10.0
+        forecast = self._make(
+            combined=CombinedSea(significant_height_meters=2.0),
+            primary=SwellPartition(significant_height_meters=2.0, mean_period_seconds=10.0),
+        )
+        assert forecast.power_kilowatts_per_meter == pytest.approx(expected)
+
+    def test_sums_across_multiple_partitions(self):
+        import math
+
+        import pytest
+
+        coeff = 1025 * 9.81**2 / (64 * math.pi * 1000)
+        expected = coeff * ((2.0**2) * 10.0 + (1.0**2) * 5.0)
+        forecast = self._make(
+            combined=CombinedSea(significant_height_meters=2.2),
+            wind_sea=WindSea(significant_height_meters=1.0, mean_period_seconds=5.0),
+            primary=SwellPartition(significant_height_meters=2.0, mean_period_seconds=10.0),
+        )
+        assert forecast.power_kilowatts_per_meter == pytest.approx(expected)
+
+    def test_partition_missing_period_is_skipped(self):
+        import math
+
+        import pytest
+
+        coeff = 1025 * 9.81**2 / (64 * math.pi * 1000)
+        expected = coeff * (2.0**2) * 10.0
+        forecast = self._make(
+            combined=CombinedSea(significant_height_meters=2.0),
+            wind_sea=WindSea(significant_height_meters=1.0),
+            primary=SwellPartition(significant_height_meters=2.0, mean_period_seconds=10.0),
+        )
+        assert forecast.power_kilowatts_per_meter == pytest.approx(expected)
 
 
 class TestNoHarperImports:
