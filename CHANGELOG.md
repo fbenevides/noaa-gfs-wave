@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-04-20
+
+### Added
+
+- ([62f7e97](https://github.com/fbenevides/noaa-gfs-wave/commit/62f7e97)) add combined wave power on WW3PointForecast (#2) by @Felipe Benevides
+- ([d3f1eb7](https://github.com/fbenevides/noaa-gfs-wave/commit/d3f1eb7)) expose wind speed in knots on Wind10m (#1) by @Felipe Benevides
+
+### Changed
+
+- ([3f729d2](https://github.com/fbenevides/noaa-gfs-wave/commit/3f729d2)) gitignore local-only files pattern by @fbenevides
+
+
 ## [0.1.1] - 2026-04-19
 
 ### Added
