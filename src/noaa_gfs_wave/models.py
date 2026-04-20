@@ -110,8 +110,6 @@ class WW3PointForecast(BaseModel):
             return None
         parts = (self.wind_sea, self.primary, self.secondary, self.tertiary)
         contribs = [
-            _WAVE_POWER_COEFF_KW_PER_M * p.significant_height_meters**2 * p.mean_period_seconds
-            for p in parts
-            if p.significant_height_meters is not None and p.mean_period_seconds is not None
+            p.power_kilowatts_per_meter for p in parts if p.power_kilowatts_per_meter is not None
         ]
         return sum(contribs) if contribs else None
