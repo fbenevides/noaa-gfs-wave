@@ -6,7 +6,9 @@ Dependencies: stdlib (datetime) + pydantic only.
 
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, computed_field
+
+_MPS_TO_KNOTS = 3600 / 1852
 
 
 class Wind10m(BaseModel):
@@ -16,6 +18,13 @@ class Wind10m(BaseModel):
     direction_degrees_from: float | None = None
     u_component_meters_per_second: float | None = None
     v_component_meters_per_second: float | None = None
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def speed_knots(self) -> float | None:
+        if self.speed_meters_per_second is None:
+            return None
+        return self.speed_meters_per_second * _MPS_TO_KNOTS
 
 
 class CombinedSea(BaseModel):

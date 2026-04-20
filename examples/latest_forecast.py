@@ -26,7 +26,9 @@ def print_point(point: WW3PointForecast, lat: float, lon: float) -> None:
     print(f"  Hs    : {point.combined.significant_height_meters:.2f} m")
     print(f"  period: {point.dominant.period_seconds:.1f} s")
     print(f"  dir   : {point.dominant.direction_degrees_from:.0f} deg (from)")
-    print(f"  wind  : {point.wind10m.speed_meters_per_second:.1f} m/s")
+    print(
+        f"  wind  : {point.wind10m.speed_meters_per_second:.1f} m/s ({point.wind10m.speed_knots:.1f} kn)"
+    )
 
 
 if __name__ == "__main__":
