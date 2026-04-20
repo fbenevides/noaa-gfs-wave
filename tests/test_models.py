@@ -138,7 +138,7 @@ class TestWW3PointForecastIsLand:
         assert forecast.is_land() is False
 
 
-class TestWW3PointForecastEnergyFlux:
+class TestWW3PointForecastPower:
     def _make(self, **overrides):
         from datetime import UTC, datetime
 
@@ -157,11 +157,11 @@ class TestWW3PointForecastEnergyFlux:
 
     def test_returns_none_for_land_point(self):
         forecast = self._make()
-        assert forecast.energy_flux_kilowatts_per_meter is None
+        assert forecast.power_kilowatts_per_meter is None
 
     def test_returns_none_when_ocean_but_all_partitions_missing_data(self):
         forecast = self._make(combined=CombinedSea(significant_height_meters=2.0))
-        assert forecast.energy_flux_kilowatts_per_meter is None
+        assert forecast.power_kilowatts_per_meter is None
 
     def test_single_partition_matches_physics_formula(self):
         import math
@@ -174,7 +174,7 @@ class TestWW3PointForecastEnergyFlux:
             combined=CombinedSea(significant_height_meters=2.0),
             primary=SwellPartition(significant_height_meters=2.0, mean_period_seconds=10.0),
         )
-        assert forecast.energy_flux_kilowatts_per_meter == pytest.approx(expected)
+        assert forecast.power_kilowatts_per_meter == pytest.approx(expected)
 
     def test_sums_across_multiple_partitions(self):
         import math
@@ -188,7 +188,7 @@ class TestWW3PointForecastEnergyFlux:
             wind_sea=WindSea(significant_height_meters=1.0, mean_period_seconds=5.0),
             primary=SwellPartition(significant_height_meters=2.0, mean_period_seconds=10.0),
         )
-        assert forecast.energy_flux_kilowatts_per_meter == pytest.approx(expected)
+        assert forecast.power_kilowatts_per_meter == pytest.approx(expected)
 
     def test_partition_missing_period_is_skipped(self):
         import math
@@ -202,7 +202,7 @@ class TestWW3PointForecastEnergyFlux:
             wind_sea=WindSea(significant_height_meters=1.0),
             primary=SwellPartition(significant_height_meters=2.0, mean_period_seconds=10.0),
         )
-        assert forecast.energy_flux_kilowatts_per_meter == pytest.approx(expected)
+        assert forecast.power_kilowatts_per_meter == pytest.approx(expected)
 
 
 class TestNoHarperImports:

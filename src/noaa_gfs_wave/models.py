@@ -89,7 +89,7 @@ class WW3PointForecast(BaseModel):
 
     @computed_field  # type: ignore[prop-decorator]
     @property
-    def energy_flux_kilowatts_per_meter(self) -> float | None:
+    def power_kilowatts_per_meter(self) -> float | None:
         if self.is_land():
             return None
         parts = (self.wind_sea, self.primary, self.secondary, self.tertiary)
