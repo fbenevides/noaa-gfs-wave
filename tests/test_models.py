@@ -21,6 +21,16 @@ class TestWind10m:
         w = Wind10m(speed_meters_per_second=5.2, direction_degrees_from=180.0)
         assert w.speed_meters_per_second == 5.2
 
+    def test_speed_knots_is_none_when_speed_meters_per_second_is_none(self):
+        w = Wind10m()
+        assert w.speed_knots is None
+
+    def test_speed_knots_converts_from_meters_per_second(self):
+        import pytest
+
+        w = Wind10m(speed_meters_per_second=10.0)
+        assert w.speed_knots == pytest.approx(10.0 * 3600 / 1852)
+
 
 class TestCombinedSea:
     def test_all_fields_optional(self):
