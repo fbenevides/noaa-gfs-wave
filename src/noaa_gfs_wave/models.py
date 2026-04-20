@@ -4,11 +4,13 @@ All models are portable — zero Harper or external service imports.
 Dependencies: stdlib (datetime) + pydantic only.
 """
 
+import math
 from datetime import datetime
 
 from pydantic import BaseModel, computed_field
 
 _MPS_TO_KNOTS = 3600 / 1852
+_WAVE_POWER_COEFF_KW_PER_M = 1025 * 9.81**2 / (64 * math.pi * 1000)
 
 
 class Wind10m(BaseModel):
@@ -84,3 +86,16 @@ class WW3PointForecast(BaseModel):
 
     def is_land(self) -> bool:
         return self.combined.significant_height_meters is None
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def energy_flux_kilowatts_per_meter(self) -> float | None:
+        if self.is_land():
+            return None
+        parts = (self.wind_sea, self.primary, self.secondary, self.tertiary)
+        contribs = [
+            _WAVE_POWER_COEFF_KW_PER_M * p.significant_height_meters**2 * p.mean_period_seconds
+            for p in parts
+            if p.significant_height_meters is not None and p.mean_period_seconds is not None
+        ]
+        return sum(contribs) if contribs else None
